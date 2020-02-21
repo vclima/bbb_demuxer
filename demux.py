@@ -1,5 +1,4 @@
 from bbb_pru_adc.capture import capture 
-import matplotlib.pyplot as plt
 import threading
 import numpy as np
 
@@ -12,15 +11,24 @@ def ADC_read():
    global read_delay
    global new_read
    global kill_thread
+
+   Fs=20
+   T=2
+
    measure=[0,0]
-   with capture(clk_div=893,step_avg=0,channels=[0, 1],auto_install=False,max_num=1,target_delay=9999999) as cap:
+
+   clk=int(17000/Fs)
+   clk_delay=int((1/(Fs*5e-9))-1)
+   samples=int(Fs*T)
+
+   with capture(clk_div=clk,step_avg=0,channels=[0, 1],auto_install=False,max_num=samples,target_delay=clk_delay) as cap:
       for num_dropped, timestamps, values in cap:
          measure_lock.acquire()
          if(new_read):
             print('DROPPED READING')
-         measure[0]=values[0]
-         measure[1]=values[1]
-         read_delay=timestamps[0]
+         measure[0]=values[0::2]
+         measure[1]=values[1::2]
+         read_delay=timestamps[0:]
          new_read=1
          measure_lock.release()
          if(kill_thread):
@@ -36,6 +44,9 @@ def main():
    global read_delay
    global new_read
    global kill_thread
+   global adc0
+   global adc1
+   global sample_time
 
    kill_thread=0
    new_read=0
@@ -51,13 +62,13 @@ def main():
          if(new_read):
             adc0.append(measure[0])
             adc1.append(measure[1])
-            sample_time.append(read_delay)
+            sample_time.extend(read_delay)
             measure_lock.acquire()
             new_read=0
             measure_lock.release()
             samples+=1
             print('Samples: ',samples)
-   except:
+   except KeyboardInterrupt:
       kill_thread=1
       print('Sending kill ADC thread signal')
       ADC_thread.join()
@@ -67,7 +78,7 @@ def main():
    avg_sample=np.mean(sample_time[1:])*5e-9
    jitter=np.std(sample_time[1:])*5e-9
 
-   print('Average sanple time:',avg_sample)
+   print('Average sample time:',avg_sample)
    print('Average Jitter:',jitter)
    '''
    t=np.linspace(0,len(sample_time)*5e-9,len(sample_time))
