@@ -48,6 +48,17 @@ def IQ(m,n,adc_raw):
 
    return [I,Q]
 
+def amp(I,Q):
+   amp=np.sqrt(I**2+Q**2)
+   return amp
+
+def phase(I,Q,I_MO,Q_MO):
+   phase_adc=np.arctan2(Q,I)
+   phase_mo=np.arctan2(Q_MO,I_MO)
+   deg=180*(phase_mo-phase_adc)/np.pi
+
+   return deg
+
 def main():
 
    global measure
@@ -74,16 +85,19 @@ def main():
    try:
       while(1):
          if(new_read):
-            adc0.append(measure[0])
-            MO.append(measure[1])
+            adc0=measure[0]
+            MO=measure[1]
             sample_time.extend(read_delay)
             measure_lock.acquire()
             new_read=0
             measure_lock.release()
             samples+=1
             [I_MO,Q_MO]=IQ(m,n,MO)
+            [I,Q]=IQ(m,n,adc0)
             print('Samples: ',samples)
             print('I_MO:',I_MO,'Q_MO:',Q_MO)
+            print('I:',I,'Q:',Q)
+            print('AMP:',amp(I,Q),'Phase',phase(I,Q,I_MO,Q_MO))
    except KeyboardInterrupt:
       kill_thread=1
       print('Sending kill ADC thread signal')
