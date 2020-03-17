@@ -1,5 +1,4 @@
 *.pyc
 .vscode
 debug.py
-*.pickle
-plot.py
+
