@@ -73,8 +73,8 @@ def main():
    kill_thread=0
    new_read=0
 
-   n=7
-   m=2
+   n=3
+   m=1
    
 
    ADC_thread=threading.Thread(target=ADC_read,args=(m,n))
