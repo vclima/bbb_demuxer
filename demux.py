@@ -76,7 +76,7 @@ def main():
    n=16
    m=4
    
-
+   print('Starting ADC thread with ',n,' readings for each ',m,' periods')
    ADC_thread=threading.Thread(target=ADC_read,args=(m,n))
    ADC_thread.start()
    adc0=[]
