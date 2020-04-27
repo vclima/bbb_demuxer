@@ -15,7 +15,7 @@ def ADC_read(m,n):
 
    F_sig=40
    Fs=F_sig*n/m
-   
+   print('Sampling frequency '+str(Fs))
 
    measure=[0,0]
 
